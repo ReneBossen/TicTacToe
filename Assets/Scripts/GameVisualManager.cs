@@ -17,15 +17,26 @@ namespace Assets.Scripts
 
         private void GameManager_OnClickedOnGridPosition(object sender, GameManager.OnClickedOnGridPositionEventArgs args)
         {
-            Debug.Log("GameManager_OnClickedOnGridPosition");
-            SpawnObjectCmd(args.x, args.y);
+            SpawnObject(args.x, args.y, args.playerType);
         }
 
         [Server]
-        private void SpawnObjectCmd(int x, int y)
+        private void SpawnObject(int x, int y, GameManager.PlayerType playerType)
         {
-            Debug.Log("SpawnObject");
-            GameObject spawnedCrossObject = Instantiate(_crossPrefab, GetGridWorldPosition(x, y), Quaternion.identity);
+            GameObject prefab;
+
+            switch (playerType)
+            {
+                default:
+                case GameManager.PlayerType.Cross:
+                    prefab = _crossPrefab;
+                    break;
+                case GameManager.PlayerType.Circle:
+                    prefab = _circlePrefab;
+                    break;
+            }
+
+            GameObject spawnedCrossObject = Instantiate(prefab, GetGridWorldPosition(x, y), Quaternion.identity);
             NetworkServer.Spawn(spawnedCrossObject);
         }
 

@@ -15,10 +15,8 @@ namespace Assets.Scripts
 
             PlayerController player = NetworkClient.localPlayer.GetComponent<PlayerController>();
 
-            if (player == null)
-                Debug.LogError("Local player object not found!");
-
-            player.NotifyServerOnGridClick(_x, _y);
+            if (player != null)
+                player.NotifyServerOnGridClick(_x, _y);
         }
     }
 }

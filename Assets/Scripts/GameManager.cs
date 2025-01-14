@@ -14,6 +14,7 @@ namespace Assets.Scripts
         {
             public int x;
             public int y;
+            public PlayerType playerType;
         }
 
         public enum PlayerType
@@ -22,8 +23,6 @@ namespace Assets.Scripts
             Cross,
             Circle,
         }
-
-        private PlayerType localPlayerType;
 
         private void Awake()
         {
@@ -35,13 +34,13 @@ namespace Assets.Scripts
             Instance = this;
         }
 
-        public void ClickedOnGridPosition(int x, int y)
+        public void ClickedOnGridPosition(int x, int y, PlayerType playerType)
         {
-            Debug.Log($"ClickedOnGridPosition {x}, {y}");
             OnClickedOnGridPosition?.Invoke(this, new OnClickedOnGridPositionEventArgs
             {
                 x = x,
-                y = y
+                y = y,
+                playerType = playerType
             });
         }
     }
