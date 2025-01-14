@@ -592,9 +592,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b0996f09e7d8c748831934a0e2ccd41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0
 --- !u!4 &574086539
 Transform:
   m_ObjectHideFlags: 0
@@ -892,8 +889,8 @@ MonoBehaviour:
   disconnectInactiveConnections: 0
   disconnectInactiveTimeout: 60
   authenticator: {fileID: 0}
-  playerPrefab: {fileID: 0}
-  autoCreatePlayer: 0
+  playerPrefab: {fileID: 6310319431957949415, guid: e8b3efff11b77db4db93aade667a7168, type: 3}
+  autoCreatePlayer: 1
   playerSpawnMethod: 0
   spawnPrefabs:
   - {fileID: 2638327346927294342, guid: e670c6c89a3e85e45a674615d9921e93, type: 3}

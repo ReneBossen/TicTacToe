@@ -27,7 +27,6 @@ namespace Assets.Scripts
             Debug.Log("SpawnObject");
             GameObject spawnedCrossObject = Instantiate(_crossPrefab, GetGridWorldPosition(x, y), Quaternion.identity);
             NetworkServer.Spawn(spawnedCrossObject);
-            spawnedCrossObject.transform.position = GetGridWorldPosition(x, y);
         }
 
         private Vector2 GetGridWorldPosition(int x, int y)

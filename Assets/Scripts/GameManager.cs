@@ -1,9 +1,10 @@
+using Mirror;
 using System;
 using UnityEngine;
 
 namespace Assets.Scripts
 {
-    public class GameManager : MonoBehaviour
+    public class GameManager : NetworkBehaviour
     {
         public static GameManager Instance { get; private set; }
 
@@ -14,6 +15,15 @@ namespace Assets.Scripts
             public int x;
             public int y;
         }
+
+        public enum PlayerType
+        {
+            None,
+            Cross,
+            Circle,
+        }
+
+        private PlayerType localPlayerType;
 
         private void Awake()
         {

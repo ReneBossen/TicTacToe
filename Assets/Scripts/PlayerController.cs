@@ -1,16 +1,24 @@
+using Mirror;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+namespace Assets.Scripts
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public class PlayerController : NetworkBehaviour
     {
-        
-    }
+        public void NotifyServerOnGridClick(int x, int y)
+        {
+            if (isLocalPlayer)
+            {
+                CmdSendGridClickToServer(x, y);
+            }
+        }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        [Command]
+        private void CmdSendGridClickToServer(int x, int y)
+        {
+            Debug.Log($"Server received grid click at {x}, {y}");
+
+            GameManager.Instance.ClickedOnGridPosition(x, y);
+        }
     }
 }

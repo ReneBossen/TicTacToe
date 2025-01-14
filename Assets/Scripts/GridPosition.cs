@@ -1,3 +1,4 @@
+using Mirror;
 using UnityEngine;
 
 namespace Assets.Scripts
@@ -9,8 +10,15 @@ namespace Assets.Scripts
 
         private void OnMouseDown()
         {
-            Debug.Log($"Click! {_x}, {_y}");
-            GameManager.Instance.ClickedOnGridPosition(_x, _y);
+            if (!NetworkClient.active)
+                return;
+
+            PlayerController player = NetworkClient.localPlayer.GetComponent<PlayerController>();
+
+            if (player == null)
+                Debug.LogError("Local player object not found!");
+
+            player.NotifyServerOnGridClick(_x, _y);
         }
     }
 }
