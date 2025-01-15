@@ -25,37 +25,36 @@ namespace Assets.Scripts
             GameManager.Instance.OnCurrentPlayablePlayerTypeChanged += GameManager_OnCurrentPlayablePlayerTypeChanged;
         }
 
+        private void GameManager_OnGameStarted(object sender, EventArgs args)
+        {
+            NetworkIdentity localPlayerIdentity = NetworkClient.connection.identity;
+
+            if (localPlayerIdentity == null)
+                return;
+
+            PlayerController player = localPlayerIdentity.GetComponent<PlayerController>();
+
+            if (player == null)
+                return;
+
+            if (player.GetPlayerType() == GameManager.PlayerType.Cross)
+            {
+                _crossYouTextGameObject.SetActive(true);
+            }
+            else
+            {
+                _circleYouTextGameObject.SetActive(true);
+            }
+        }
+
         private void GameManager_OnCurrentPlayablePlayerTypeChanged(object sender, EventArgs args)
         {
             UpdateCurrentArrow();
         }
 
-        private void GameManager_OnGameStarted(object sender, EventArgs args)
-        {
-            NetworkIdentity localPlayerIdentity = NetworkClient.connection.identity;
-
-            if (localPlayerIdentity != null)
-            {
-                PlayerController player = localPlayerIdentity.GetComponent<PlayerController>();
-
-                if (player != null)
-                {
-                    if (player.GetPlayerType() == GameManager.PlayerType.Cross)
-                    {
-                        _crossYouTextGameObject.SetActive(true);
-                    }
-                    else
-                    {
-                        _circleYouTextGameObject.SetActive(true);
-                    }
-                }
-            }
-
-            UpdateCurrentArrow();
-        }
-
         private void UpdateCurrentArrow()
         {
+            Debug.Log($"CurrentPlayablePlayerType: {GameManager.Instance.GetCurrentPlayablePlayerType()}");
             if (GameManager.Instance.GetCurrentPlayablePlayerType() == GameManager.PlayerType.Cross)
             {
                 _crossArrowGameObject.SetActive(true);

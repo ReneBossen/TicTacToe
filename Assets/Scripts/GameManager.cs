@@ -26,7 +26,7 @@ namespace Assets.Scripts
             Circle,
         }
 
-        [SyncVar]
+        [SyncVar(hook = nameof(TriggerOnCurrentPlayablePlayerTypeChanged))]
         private PlayerType _currentPlayablePlayerType;
 
         private void Awake()
@@ -49,15 +49,19 @@ namespace Assets.Scripts
         {
             return _currentPlayablePlayerType;
         }
+        private void TriggerOnCurrentPlayablePlayerTypeChanged(PlayerType oldPlayerType, PlayerType newPlayerType)
+        {
+            OnCurrentPlayablePlayerTypeChanged?.Invoke(this, EventArgs.Empty);
+        }
 
         [Server]
         public void StartGame()
         {
-            TriggerOnGameStarted();
+            TriggerOnGameStartedRpc();
         }
 
         [ClientRpc]
-        private void TriggerOnGameStarted()
+        private void TriggerOnGameStartedRpc()
         {
             OnGameStarted?.Invoke(this, EventArgs.Empty);
         }
@@ -85,8 +89,6 @@ namespace Assets.Scripts
                     _currentPlayablePlayerType = PlayerType.Cross;
                     break;
             }
-
-            OnCurrentPlayablePlayerTypeChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 }
