@@ -54,7 +54,6 @@ namespace Assets.Scripts
 
         private void UpdateCurrentArrow()
         {
-            Debug.Log($"CurrentPlayablePlayerType: {GameManager.Instance.GetCurrentPlayablePlayerType()}");
             if (GameManager.Instance.GetCurrentPlayablePlayerType() == GameManager.PlayerType.Cross)
             {
                 _crossArrowGameObject.SetActive(true);

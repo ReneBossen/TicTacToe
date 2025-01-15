@@ -14,7 +14,10 @@ namespace Assets.Scripts
         private void Start()
         {
             GameManager.Instance.OnClickedOnGridPosition += GameManager_OnClickedOnGridPosition;
-            GameManager.Instance.OnGameWin += GameManager_OnGameWin;
+            if (isServer)
+            {
+                GameManager.Instance.OnGameWin += GameManager_OnGameWin;
+            }
         }
 
         private void GameManager_OnClickedOnGridPosition(object sender, GameManager.OnClickedOnGridPositionEventArgs args)
@@ -22,6 +25,7 @@ namespace Assets.Scripts
             SpawnObject(args.x, args.y, args.playerType);
         }
 
+        [Server]
         private void GameManager_OnGameWin(object sender, GameManager.OnGameWinEventArgs args)
         {
             float eulerZ = 0f;

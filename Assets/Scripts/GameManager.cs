@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static Assets.Scripts.GameManager;
 
 namespace Assets.Scripts
 {
@@ -20,6 +21,7 @@ namespace Assets.Scripts
         public class OnGameWinEventArgs : EventArgs
         {
             public Line line;
+            public PlayerType winPlayerType;
         }
 
         public class OnClickedOnGridPositionEventArgs : EventArgs
@@ -145,6 +147,7 @@ namespace Assets.Scripts
             TestWinner();
         }
 
+        [Server]
         private void TestWinner()
         {
             foreach (Line line in lineList.Where(TestWinnerLine))
@@ -152,12 +155,20 @@ namespace Assets.Scripts
                 //Win
                 Debug.Log("Winner!");
                 _currentPlayablePlayerType = PlayerType.None;
-                OnGameWin?.Invoke(this, new OnGameWinEventArgs
-                {
-                    line = line
-                });
+                TriggerOnGameWinnerRpc(line);
                 break;
             }
+        }
+
+        [ClientRpc]
+        private void TriggerOnGameWinnerRpc(Line line)
+        {
+            OnGameWin?.Invoke(this, new OnGameWinEventArgs
+            {
+                line = line,
+                winPlayerType = _playerTypeArray[line.centerGridPosition.x, line.centerGridPosition.y]
+            });
+            Debug.Log("TriggeredOnGameWinner");
         }
 
         private bool TestWinnerLine(Line line)
