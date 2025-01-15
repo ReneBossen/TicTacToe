@@ -16,9 +16,11 @@ namespace Assets.Scripts
         public event EventHandler<OnClickedOnGridPositionEventArgs> OnClickedOnGridPosition;
         public event EventHandler OnGameStarted;
         public event EventHandler OnCurrentPlayablePlayerTypeChanged;
+        public event EventHandler OnScoreChanged;
         public event EventHandler<OnGameWinEventArgs> OnGameWin;
         public event EventHandler OnRematch;
         public event EventHandler OnGameTied;
+        public event EventHandler OnPlacedObject;
 
         public class OnGameWinEventArgs : EventArgs
         {
@@ -57,10 +59,15 @@ namespace Assets.Scripts
 
         [SyncVar(hook = nameof(TriggerOnCurrentPlayablePlayerTypeChanged))]
         private PlayerType _currentPlayablePlayerType;
+        [SyncVar(hook = nameof(TriggerOnScoreChanged))]
+        private int _playerCrossScore;
+        [SyncVar(hook = nameof(TriggerOnScoreChanged))]
+        private int _playerCircleScore;
 
         private PlayerType _startedLastMatchPlayerType;
         private PlayerType[,] _playerTypeArray;
-        private List<Line> lineList;
+        private List<Line> _lineList;
+
 
         private void Awake()
         {
@@ -73,7 +80,7 @@ namespace Assets.Scripts
 
             _playerTypeArray = new PlayerType[3, 3];
 
-            lineList = new List<Line>
+            _lineList = new List<Line>
             {
                 //Horizontal
                 new() {gridVector2IntList = new List<Vector2Int> { new(0, 0), new(1, 0), new(2, 0) }, centerGridPosition = new Vector2Int(1,0), orientation = Orientation.Horizontal},
@@ -102,9 +109,15 @@ namespace Assets.Scripts
         {
             return _currentPlayablePlayerType;
         }
+
         private void TriggerOnCurrentPlayablePlayerTypeChanged(PlayerType oldPlayerType, PlayerType newPlayerType)
         {
             OnCurrentPlayablePlayerTypeChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void TriggerOnScoreChanged(int oldScore, int newScore)
+        {
+            OnScoreChanged?.Invoke(this, EventArgs.Empty);
         }
 
         [Server]
@@ -129,6 +142,7 @@ namespace Assets.Scripts
                 return;
 
             _playerTypeArray[x, y] = playerType;
+            TriggerOnPlacedObjectRpc();
 
             OnClickedOnGridPosition?.Invoke(this, new OnClickedOnGridPositionEventArgs
             {
@@ -154,12 +168,21 @@ namespace Assets.Scripts
         [Server]
         private void TestWinner()
         {
-            foreach (Line line in lineList.Where(TestWinnerLine))
+            foreach (Line line in _lineList.Where(TestWinnerLine))
             {
-                //Win
-                Debug.Log("Winner!");
                 _currentPlayablePlayerType = PlayerType.None;
                 PlayerType winningPlayerType = _playerTypeArray[line.centerGridPosition.x, line.centerGridPosition.y];
+
+                switch (winningPlayerType)
+                {
+                    default:
+                    case PlayerType.Cross:
+                        _playerCrossScore++;
+                        break;
+                    case PlayerType.Circle:
+                        _playerCircleScore++;
+                        break;
+                }
 
                 TriggerOnGameWinnerRpc(line, winningPlayerType);
                 return;
@@ -188,6 +211,12 @@ namespace Assets.Scripts
             {
                 TriggerOnGameTiedRpc();
             }
+        }
+
+        [ClientRpc]
+        private void TriggerOnPlacedObjectRpc()
+        {
+            OnPlacedObject?.Invoke(this, EventArgs.Empty);
         }
 
         [ClientRpc]
@@ -258,6 +287,12 @@ namespace Assets.Scripts
                     _startedLastMatchPlayerType = PlayerType.Cross;
                     break;
             }
+        }
+
+        public void GetScores(out int playerCrossScore, out int playerCircleScore)
+        {
+            playerCrossScore = _playerCrossScore;
+            playerCircleScore = _playerCircleScore;
         }
     }
 }
