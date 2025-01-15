@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Assets.Scripts
 {
-    public class PlayerUI : MonoBehaviour
+    public class PlayerUI : NetworkBehaviour
     {
         [SerializeField] private GameObject _crossYouTextGameObject;
         [SerializeField] private GameObject _circleYouTextGameObject;
@@ -33,17 +33,22 @@ namespace Assets.Scripts
 
         private void GameManager_OnGameStarted(object sender, EventArgs args)
         {
-            foreach (PlayerController player in NetworkServer.spawned
-                         .Select(networkObject => networkObject.Value.GetComponent<PlayerController>())
-                         .Where(player => player != null))
+            NetworkIdentity localPlayerIdentity = NetworkClient.connection.identity;
+
+            if (localPlayerIdentity != null)
             {
-                if (player.GetPlayerType() == GameManager.PlayerType.Cross)
+                PlayerController player = localPlayerIdentity.GetComponent<PlayerController>();
+
+                if (player != null)
                 {
-                    _crossYouTextGameObject.SetActive(true);
-                }
-                else
-                {
-                    _circleYouTextGameObject.SetActive(true);
+                    if (player.GetPlayerType() == GameManager.PlayerType.Cross)
+                    {
+                        _crossYouTextGameObject.SetActive(true);
+                    }
+                    else
+                    {
+                        _circleYouTextGameObject.SetActive(true);
+                    }
                 }
             }
 
