@@ -1,11 +1,10 @@
 using Mirror;
 using System;
-using System.Linq;
 using UnityEngine;
 
 namespace Assets.Scripts
 {
-    public class PlayerUI : NetworkBehaviour
+    public class PlayerUI : MonoBehaviour
     {
         [SerializeField] private GameObject _crossYouTextGameObject;
         [SerializeField] private GameObject _circleYouTextGameObject;
