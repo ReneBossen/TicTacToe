@@ -26,6 +26,7 @@ namespace Assets.Scripts
             Circle,
         }
 
+        [SyncVar]
         private PlayerType _currentPlayablePlayerType;
 
         private void Awake()
