@@ -1,4 +1,5 @@
 using Mirror;
+using System;
 using UnityEngine;
 using static Assets.Scripts.GameManager;
 
@@ -19,6 +20,13 @@ namespace Assets.Scripts
             {
                 Debug.LogError("Player component not found on NetworkIdentity.");
             }
+
+            if (NetworkServer.connections.Count != 2)
+                return;
+
+            //Start Game
+            GameManager.Instance.SetStartingPlayerType(PlayerType.Cross);
+            GameManager.Instance.StartGame();
         }
     }
 }

@@ -9,6 +9,8 @@ namespace Assets.Scripts
         public static GameManager Instance { get; private set; }
 
         public event EventHandler<OnClickedOnGridPositionEventArgs> OnClickedOnGridPosition;
+        public event EventHandler OnGameStarted;
+        public event EventHandler OnCurrentPlayablePlayerTypeChanged;
 
         public class OnClickedOnGridPositionEventArgs : EventArgs
         {
@@ -24,6 +26,8 @@ namespace Assets.Scripts
             Circle,
         }
 
+        private PlayerType _currentPlayablePlayerType;
+
         private void Awake()
         {
             if (Instance != null)
@@ -34,14 +38,54 @@ namespace Assets.Scripts
             Instance = this;
         }
 
+        [Server]
+        public void SetStartingPlayerType(PlayerType playerType)
+        {
+            _currentPlayablePlayerType = playerType;
+        }
+
+        public PlayerType GetCurrentPlayablePlayerType()
+        {
+            return _currentPlayablePlayerType;
+        }
+
+        [Server]
+        public void StartGame()
+        {
+            TriggerOnGameStarted();
+        }
+
+        [ClientRpc]
+        private void TriggerOnGameStarted()
+        {
+            OnGameStarted?.Invoke(this, EventArgs.Empty);
+        }
+
+        [Server]
         public void ClickedOnGridPosition(int x, int y, PlayerType playerType)
         {
+            if (playerType != _currentPlayablePlayerType)
+                return;
+
             OnClickedOnGridPosition?.Invoke(this, new OnClickedOnGridPositionEventArgs
             {
                 x = x,
                 y = y,
                 playerType = playerType
             });
+
+            switch (_currentPlayablePlayerType)
+            {
+                default:
+                case PlayerType.Cross:
+                    _currentPlayablePlayerType = PlayerType.Circle;
+                    break;
+                case PlayerType.Circle:
+                    _currentPlayablePlayerType = PlayerType.Cross;
+                    break;
+            }
+
+            OnCurrentPlayablePlayerTypeChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 }
