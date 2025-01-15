@@ -24,14 +24,20 @@ namespace Assets.Scripts
         {
             if (isLocalPlayer)
             {
-                CmdSendGridClickToServer(x, y);
+                SendGridClickToServerCmd(x, y);
             }
         }
 
         [Command]
-        private void CmdSendGridClickToServer(int x, int y)
+        private void SendGridClickToServerCmd(int x, int y)
         {
             GameManager.Instance.ClickedOnGridPosition(x, y, GetPlayerType());
+        }
+
+        [Command]
+        public void RematchCmd()
+        {
+            GameManager.Instance.Rematch();
         }
     }
 }

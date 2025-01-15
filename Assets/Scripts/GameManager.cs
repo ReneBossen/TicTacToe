@@ -17,6 +17,8 @@ namespace Assets.Scripts
         public event EventHandler OnGameStarted;
         public event EventHandler OnCurrentPlayablePlayerTypeChanged;
         public event EventHandler<OnGameWinEventArgs> OnGameWin;
+        public event EventHandler OnRematch;
+        public event EventHandler OnGameTied;
 
         public class OnGameWinEventArgs : EventArgs
         {
@@ -56,6 +58,7 @@ namespace Assets.Scripts
         [SyncVar(hook = nameof(TriggerOnCurrentPlayablePlayerTypeChanged))]
         private PlayerType _currentPlayablePlayerType;
 
+        private PlayerType _startedLastMatchPlayerType;
         private PlayerType[,] _playerTypeArray;
         private List<Line> lineList;
 
@@ -92,6 +95,7 @@ namespace Assets.Scripts
         public void SetStartingPlayerType(PlayerType playerType)
         {
             _currentPlayablePlayerType = playerType;
+            _startedLastMatchPlayerType = playerType;
         }
 
         public PlayerType GetCurrentPlayablePlayerType()
@@ -155,20 +159,51 @@ namespace Assets.Scripts
                 //Win
                 Debug.Log("Winner!");
                 _currentPlayablePlayerType = PlayerType.None;
-                TriggerOnGameWinnerRpc(line);
-                break;
+                PlayerType winningPlayerType = _playerTypeArray[line.centerGridPosition.x, line.centerGridPosition.y];
+
+                TriggerOnGameWinnerRpc(line, winningPlayerType);
+                return;
+            }
+
+            TestIfTie();
+        }
+
+        [Server]
+        private void TestIfTie()
+        {
+            bool hasTie = true;
+            for (int x = 0; x < _playerTypeArray.GetLength(0); x++)
+            {
+                for (int y = 0; y < _playerTypeArray.GetLength(1); y++)
+                {
+                    if (_playerTypeArray[x, y] == PlayerType.None)
+                    {
+                        hasTie = false;
+                        break;
+                    }
+                }
+            }
+
+            if (hasTie)
+            {
+                TriggerOnGameTiedRpc();
             }
         }
 
         [ClientRpc]
-        private void TriggerOnGameWinnerRpc(Line line)
+        private void TriggerOnGameWinnerRpc(Line line, PlayerType playerType)
         {
             OnGameWin?.Invoke(this, new OnGameWinEventArgs
             {
                 line = line,
-                winPlayerType = _playerTypeArray[line.centerGridPosition.x, line.centerGridPosition.y]
+                winPlayerType = playerType
             });
-            Debug.Log("TriggeredOnGameWinner");
+        }
+
+        [ClientRpc]
+        private void TriggerOnGameTiedRpc()
+        {
+            OnGameTied?.Invoke(this, EventArgs.Empty);
         }
 
         private bool TestWinnerLine(Line line)
@@ -185,6 +220,44 @@ namespace Assets.Scripts
             return aPlayerType != PlayerType.None &&
                    aPlayerType == bPlayerType &&
                    bPlayerType == cPlayerType;
+        }
+
+        [Server]
+        public void Rematch()
+        {
+            for (int x = 0; x < _playerTypeArray.GetLength(0); x++)
+            {
+                for (int y = 0; y < _playerTypeArray.GetLength(1); y++)
+                {
+                    _playerTypeArray[x, y] = PlayerType.None;
+                }
+            }
+
+            SetRematchStartingPlayerType();
+            TriggerOnRematchRpc();
+        }
+
+        [ClientRpc]
+        private void TriggerOnRematchRpc()
+        {
+            OnRematch?.Invoke(this, EventArgs.Empty);
+        }
+
+        [Server]
+        private void SetRematchStartingPlayerType()
+        {
+            switch (_startedLastMatchPlayerType)
+            {
+                default:
+                case PlayerType.Cross:
+                    _currentPlayablePlayerType = PlayerType.Circle;
+                    _startedLastMatchPlayerType = PlayerType.Circle;
+                    break;
+                case PlayerType.Circle:
+                    _currentPlayablePlayerType = PlayerType.Cross;
+                    _startedLastMatchPlayerType = PlayerType.Cross;
+                    break;
+            }
         }
     }
 }

@@ -1,4 +1,6 @@
 using Mirror;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.Scripts
@@ -9,15 +11,34 @@ namespace Assets.Scripts
         [SerializeField] private GameObject _crossPrefab;
         [SerializeField] private GameObject _winnerPrefab;
 
+        private List<GameObject> _visualGameObjectList;
+
         private const float GRID_SIZE = 2.4f;
+
+        private void Awake()
+        {
+            _visualGameObjectList = new List<GameObject>();
+        }
 
         private void Start()
         {
             GameManager.Instance.OnClickedOnGridPosition += GameManager_OnClickedOnGridPosition;
-            if (isServer)
+
+            if (!isServer)
+                return;
+
+            GameManager.Instance.OnGameWin += GameManager_OnGameWin;
+            GameManager.Instance.OnRematch += GameManager_OnRematch;
+        }
+
+        private void GameManager_OnRematch(object sender, EventArgs args)
+        {
+            foreach (GameObject visualGameObject in _visualGameObjectList)
             {
-                GameManager.Instance.OnGameWin += GameManager_OnGameWin;
+                Destroy(visualGameObject);
             }
+
+            _visualGameObjectList.Clear();
         }
 
         private void GameManager_OnClickedOnGridPosition(object sender, GameManager.OnClickedOnGridPositionEventArgs args)
@@ -52,6 +73,8 @@ namespace Assets.Scripts
                 Quaternion.Euler(0, 0, eulerZ));
 
             NetworkServer.Spawn(winnerBar);
+
+            _visualGameObjectList.Add(winnerBar);
         }
 
         [Server]
@@ -72,6 +95,8 @@ namespace Assets.Scripts
 
             GameObject spawnedCrossObject = Instantiate(prefab, GetGridWorldPosition(x, y), Quaternion.identity);
             NetworkServer.Spawn(spawnedCrossObject);
+
+            _visualGameObjectList.Add(spawnedCrossObject);
         }
 
         private Vector2 GetGridWorldPosition(int x, int y)
