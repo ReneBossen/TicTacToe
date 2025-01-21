@@ -26,6 +26,7 @@ namespace Assets.Scripts
 
             //Start Game
             GameManager.Instance.SetStartingPlayerType(PlayerType.Cross);
+            GameManager.Instance.OnServerAddPlayer();
             GameManager.Instance.StartGame();
         }
     }

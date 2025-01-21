@@ -1,17 +1,15 @@
 using Mirror;
-using NUnit.Framework;
-using NUnit.Framework.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using static Assets.Scripts.GameManager;
 
 namespace Assets.Scripts
 {
     public class GameManager : NetworkBehaviour
     {
         public static GameManager Instance { get; private set; }
+        public static event EventHandler<OnGameManagerReadyEventArgs> OnGameManagerReady;
 
         public event EventHandler<OnClickedOnGridPositionEventArgs> OnClickedOnGridPosition;
         public event EventHandler OnGameStarted;
@@ -21,6 +19,11 @@ namespace Assets.Scripts
         public event EventHandler OnRematch;
         public event EventHandler OnGameTied;
         public event EventHandler OnPlacedObject;
+
+        public class OnGameManagerReadyEventArgs : EventArgs
+        {
+            public GameManager gameManager;
+        }
 
         public class OnGameWinEventArgs : EventArgs
         {
@@ -96,6 +99,23 @@ namespace Assets.Scripts
                 new() {gridVector2IntList = new List<Vector2Int> { new(0, 0), new(1, 1), new(2, 2) }, centerGridPosition = new Vector2Int(1,1), orientation = Orientation.DiagonalA},
                 new() {gridVector2IntList = new List<Vector2Int> { new(0, 2), new(1, 1), new(2, 0) }, centerGridPosition = new Vector2Int(1,1), orientation = Orientation.DiagonalB},
             };
+        }
+
+        [Server]
+        public void OnServerAddPlayer()
+        {
+            Debug.Log("GameManager OnServerAddPlayer called");
+            RpcNotifyClientsToSubscribe();
+        }
+
+        [ClientRpc]
+        private void RpcNotifyClientsToSubscribe()
+        {
+            Debug.Log("RpcNotifyClientsToSubscribe called");
+            OnGameManagerReady?.Invoke(this, new OnGameManagerReadyEventArgs
+            {
+                gameManager = this
+            });
         }
 
         [Server]

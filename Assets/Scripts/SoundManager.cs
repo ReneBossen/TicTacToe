@@ -1,6 +1,7 @@
 using Mirror;
 using System;
 using UnityEngine;
+using static Assets.Scripts.GameManager;
 
 namespace Assets.Scripts
 {
@@ -12,8 +13,26 @@ namespace Assets.Scripts
 
         private void Start()
         {
-            GameManager.Instance.OnPlacedObject += GameManager_OnPlacedObject;
-            GameManager.Instance.OnGameWin += GameManager_OnGameWin;
+            if (GameManager.Instance != null)
+            {
+                GameManager_OnGameManagerReady(GameManager.Instance);
+            }
+            else
+            {
+                GameManager.OnGameManagerReady += GameManager_OnGameManagerReady;
+            }
+        }
+
+        private void GameManager_OnGameManagerReady(GameManager gameManager)
+        {
+            gameManager.OnPlacedObject += GameManager_OnPlacedObject;
+            gameManager.OnGameWin += GameManager_OnGameWin;
+        }
+
+        private void GameManager_OnGameManagerReady(object sender, GameManager.OnGameManagerReadyEventArgs onGameManagerReadyEventArgs)
+        {
+            onGameManagerReadyEventArgs.gameManager.OnPlacedObject += GameManager_OnPlacedObject;
+            onGameManagerReadyEventArgs.gameManager.OnGameWin += GameManager_OnGameWin;
         }
 
         private void GameManager_OnGameWin(object sender, GameManager.OnGameWinEventArgs args)

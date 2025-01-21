@@ -3,6 +3,7 @@ using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using static Assets.Scripts.GameManager;
 
 namespace Assets.Scripts
 {
@@ -30,10 +31,32 @@ namespace Assets.Scripts
 
         private void Start()
         {
-            GameManager.Instance.OnGameWin += GameManager_OnGameWin;
-            GameManager.Instance.OnRematch += GameManager_OnRematch;
-            GameManager.Instance.OnGameTied += GameManager_OnGameTied;
+            if (GameManager.Instance != null)
+            {
+                Debug.Log($"GameOverUI found GameManager.Instance");
+                GameManager_OnGameManagerReady(GameManager.Instance);
+            }
+            else
+            {
+                Debug.Log($"GameOverUI cannot find GameManager.Instance, so listening to static event OnGameManagerReady");
+                GameManager.OnGameManagerReady += GameManager_OnGameManagerReady;
+            }
+
             Hide();
+        }
+
+        private void GameManager_OnGameManagerReady(GameManager gameManager)
+        {
+            gameManager.OnGameWin += GameManager_OnGameWin;
+            gameManager.OnRematch += GameManager_OnRematch;
+            gameManager.OnGameTied += GameManager_OnGameTied;
+        }
+
+        private void GameManager_OnGameManagerReady(object sender, GameManager.OnGameManagerReadyEventArgs onGameManagerReadyEventArgs)
+        {
+            onGameManagerReadyEventArgs.gameManager.OnGameWin += GameManager_OnGameWin;
+            onGameManagerReadyEventArgs.gameManager.OnRematch += GameManager_OnRematch;
+            onGameManagerReadyEventArgs.gameManager.OnGameTied += GameManager_OnGameTied;
         }
 
         private void GameManager_OnGameTied(object sender, EventArgs args)

@@ -18,6 +18,7 @@ namespace Assets.Scripts
             });
             _startClientButton.onClick.AddListener(() =>
             {
+                NetworkManager.singleton.networkAddress = "2.104.25.110";
                 NetworkManager.singleton.StartClient();
                 Hide();
             });

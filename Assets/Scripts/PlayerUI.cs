@@ -2,6 +2,7 @@ using Mirror;
 using System;
 using TMPro;
 using UnityEngine;
+using static Assets.Scripts.GameManager;
 
 namespace Assets.Scripts
 {
@@ -26,9 +27,28 @@ namespace Assets.Scripts
 
         private void Start()
         {
-            GameManager.Instance.OnGameStarted += GameManager_OnGameStarted;
-            GameManager.Instance.OnCurrentPlayablePlayerTypeChanged += GameManager_OnCurrentPlayablePlayerTypeChanged;
-            GameManager.Instance.OnScoreChanged += GameManager_OnScoreChanged;
+            if (GameManager.Instance != null)
+            {
+                GameManager_OnGameManagerReady(GameManager.Instance);
+            }
+            else
+            {
+                GameManager.OnGameManagerReady += GameManager_OnGameManagerReady;
+            }
+        }
+
+        private void GameManager_OnGameManagerReady(GameManager gameManager)
+        {
+            gameManager.OnGameStarted += GameManager_OnGameStarted;
+            gameManager.OnCurrentPlayablePlayerTypeChanged += GameManager_OnCurrentPlayablePlayerTypeChanged;
+            gameManager.OnScoreChanged += GameManager_OnScoreChanged;
+        }
+
+        private void GameManager_OnGameManagerReady(object sender, GameManager.OnGameManagerReadyEventArgs onGameManagerReadyEventArgs)
+        {
+            onGameManagerReadyEventArgs.gameManager.OnGameStarted += GameManager_OnGameStarted;
+            onGameManagerReadyEventArgs.gameManager.OnCurrentPlayablePlayerTypeChanged += GameManager_OnCurrentPlayablePlayerTypeChanged;
+            onGameManagerReadyEventArgs.gameManager.OnScoreChanged += GameManager_OnScoreChanged;
         }
 
         private void GameManager_OnScoreChanged(object sender, EventArgs args)
