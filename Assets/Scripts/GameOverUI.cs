@@ -33,12 +33,10 @@ namespace Assets.Scripts
         {
             if (GameManager.Instance != null)
             {
-                Debug.Log($"GameOverUI found GameManager.Instance");
                 GameManager_OnGameManagerReady(GameManager.Instance);
             }
             else
             {
-                Debug.Log($"GameOverUI cannot find GameManager.Instance, so listening to static event OnGameManagerReady");
                 GameManager.OnGameManagerReady += GameManager_OnGameManagerReady;
             }
 

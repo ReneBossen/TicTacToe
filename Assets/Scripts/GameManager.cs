@@ -2,6 +2,7 @@ using Mirror;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Assets.Scripts
@@ -125,9 +126,9 @@ namespace Assets.Scripts
             _startedLastMatchPlayerType = playerType;
         }
 
-        public PlayerType GetCurrentPlayablePlayerType()
+        public Task<PlayerType> GetCurrentPlayablePlayerType()
         {
-            return _currentPlayablePlayerType;
+            return Task.FromResult(_currentPlayablePlayerType);
         }
 
         private void TriggerOnCurrentPlayablePlayerTypeChanged(PlayerType oldPlayerType, PlayerType newPlayerType)

@@ -82,6 +82,8 @@ namespace Assets.Scripts
 
             _playerCrossScoreTextMesh.text = "0";
             _playerCircleScoreTextMesh.text = "0";
+
+            UpdateCurrentArrow();
         }
 
         private void GameManager_OnCurrentPlayablePlayerTypeChanged(object sender, EventArgs args)
@@ -89,9 +91,9 @@ namespace Assets.Scripts
             UpdateCurrentArrow();
         }
 
-        private void UpdateCurrentArrow()
+        private async void UpdateCurrentArrow()
         {
-            if (GameManager.Instance.GetCurrentPlayablePlayerType() == GameManager.PlayerType.Cross)
+            if (await GameManager.Instance.GetCurrentPlayablePlayerType() == GameManager.PlayerType.Cross)
             {
                 _crossArrowGameObject.SetActive(true);
                 _circleArrowGameObject.SetActive(false);
