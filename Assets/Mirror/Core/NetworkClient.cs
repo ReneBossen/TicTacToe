@@ -1,7 +1,7 @@
+using Mirror.RemoteCalls;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Mirror.RemoteCalls;
 using UnityEngine;
 
 namespace Mirror
@@ -268,7 +268,8 @@ namespace Mirror
                 NetworkTime.SendPing();
                 OnConnectedEvent?.Invoke();
             }
-            else Debug.LogError("Skipped Connect message handling because connection is null.");
+            else
+                Debug.LogError("Skipped Connect message handling because connection is null.");
         }
 
         // helper function
@@ -412,7 +413,8 @@ namespace Mirror
                     Debug.LogError($"Still had {unbatcher.BatchesCount} batches remaining after processing, even though processing was not interrupted by a scene change. This should never happen, as it would cause ever growing batches.\nPossible reasons:\n* A message didn't deserialize as much as it serialized\n*There was no message handler for a message id, so the reader wasn't read until the end.");
                 }
             }
-            else Debug.LogError("Skipped Data message handling because connection is null.");
+            else
+                Debug.LogError("Skipped Data message handling because connection is null.");
         }
 
         // called by Transport
@@ -426,7 +428,8 @@ namespace Mirror
             // StopClient called from user code triggers Disconnected event
             // from transport which calls StopClient again, so check here
             // and short circuit running the Shutdown process twice.
-            if (connectState == ConnectState.Disconnected) return;
+            if (connectState == ConnectState.Disconnected)
+                return;
 
             // Raise the event before changing ConnectState
             // because 'active' depends on this during shutdown
@@ -482,9 +485,11 @@ namespace Mirror
                 {
                     connection.Send(message, channelId);
                 }
-                else Debug.LogError("NetworkClient Send when not connected to a server");
+                else
+                    Debug.LogError("NetworkClient Send when not connected to a server");
             }
-            else Debug.LogError("NetworkClient Send with no connection");
+            else
+                Debug.LogError("NetworkClient Send with no connection");
         }
 
         // message handlers ////////////////////////////////////////////////////
@@ -1071,7 +1076,8 @@ namespace Mirror
             {
                 connection.identity = identity;
             }
-            else Debug.LogWarning("NetworkClient can't AddPlayer before being ready. Please call NetworkClient.Ready() first. Clients are considered ready after joining the game world.");
+            else
+                Debug.LogWarning("NetworkClient can't AddPlayer before being ready. Please call NetworkClient.Ready() first. Clients are considered ready after joining the game world.");
         }
 
         /// <summary>Sends AddPlayer message to the server, indicating that we want to join the world.</summary>
@@ -1148,7 +1154,8 @@ namespace Mirror
             }
 
             spawned[message.netId] = identity;
-            if (identity.isOwned) connection?.owned.Add(identity);
+            if (identity.isOwned)
+                connection?.owned.Add(identity);
 
             // the initial spawn with OnObjectSpawnStarted/Finished calls all
             // object's OnStartClient/OnStartLocalPlayer after they were all
@@ -1314,7 +1321,8 @@ namespace Mirror
                 {
                     BootstrapIdentity(identity);
                 }
-                else Debug.LogWarning("Found null entry in NetworkClient.spawned. This is unexpected. Was the NetworkIdentity not destroyed properly?");
+                else
+                    Debug.LogWarning("Found null entry in NetworkClient.spawned. This is unexpected. Was the NetworkIdentity not destroyed properly?");
             }
             isSpawnFinished = true;
         }
@@ -1349,7 +1357,8 @@ namespace Mirror
             if (NetworkServer.spawned.TryGetValue(message.netId, out NetworkIdentity identity) && identity != null)
             {
                 spawned[message.netId] = identity;
-                if (message.isOwner) connection.owned.Add(identity);
+                if (message.isOwner)
+                    connection.owned.Add(identity);
 
                 // now do the actual 'spawning' on host mode
                 if (message.isLocalPlayer)
@@ -1414,7 +1423,8 @@ namespace Mirror
                 using (NetworkReaderPooled reader = NetworkReaderPool.Get(message.payload))
                     identity.DeserializeClient(reader, false);
             }
-            else Debug.LogWarning($"Did not find target for sync message for {message.netId}. Were all prefabs added to the NetworkManager's spawnable list?\nNote: this can be completely normal because UDP messages may arrive out of order, so this message might have arrived after a Destroy message.");
+            else
+                Debug.LogWarning($"Did not find target for sync message for {message.netId}. Were all prefabs added to the NetworkManager's spawnable list?\nNote: this can be completely normal because UDP messages may arrive out of order, so this message might have arrived after a Destroy message.");
         }
 
         static void OnRPCMessage(RpcMessage message)
@@ -1599,13 +1609,15 @@ namespace Mirror
         static void Broadcast()
         {
             // joined the world yet?
-            if (!connection.isReady) return;
+            if (!connection.isReady)
+                return;
 
             // nothing to do in host mode. server already knows the state.
-            if (NetworkServer.active) return;
+            if (NetworkServer.active)
+                return;
 
             // send time snapshot every sendInterval.
-            Send(new TimeSnapshotMessage(), Channels.Unreliable);
+            //Send(new TimeSnapshotMessage(), Channels.Unreliable);
 
             // broadcast client state to server
             BroadcastToServer();
@@ -1644,7 +1656,8 @@ namespace Mirror
                 // spawned list should have no null entries because we
                 // always call Remove in OnObjectDestroy everywhere.
                 // if it does have null then we missed something.
-                else Debug.LogWarning($"Found 'null' entry in owned list for client. This is unexpected behaviour.");
+                else
+                    Debug.LogWarning($"Found 'null' entry in owned list for client. This is unexpected behaviour.");
             }
         }
 
@@ -1814,16 +1827,20 @@ namespace Mirror
         public static void OnGUI()
         {
             // only if in world
-            if (!ready) return;
+            if (!ready)
+                return;
 
             GUILayout.BeginArea(new Rect(10, 5, 1020, 50));
 
             GUILayout.BeginHorizontal("Box");
             GUILayout.Label("Snapshot Interp.:");
             // color while catching up / slowing down
-            if (localTimescale > 1) GUI.color = Color.green; // green traffic light = go fast
-            else if (localTimescale < 1) GUI.color = Color.red;   // red traffic light = go slow
-            else GUI.color = Color.white;
+            if (localTimescale > 1)
+                GUI.color = Color.green; // green traffic light = go fast
+            else if (localTimescale < 1)
+                GUI.color = Color.red;   // red traffic light = go slow
+            else
+                GUI.color = Color.white;
             GUILayout.Box($"timeline: {localTimeline:F2}");
             GUILayout.Box($"buffer: {snapshots.Count}");
             GUILayout.Box($"DriftEMA: {NetworkClient.driftEma.Value:F2}");
